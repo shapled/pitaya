@@ -4,20 +4,20 @@ import (
 	"errors"
 	"log"
 
-	"github.com/shapled/spbridge"
+	"github.com/shapled/pitaya/v1"
 )
 
 type ABCRequest struct {
-	spbridge.BaseRequest
+	pitaya.BaseRequest
 	Name string `json:"name"`
 }
 
 type ABCResponse struct {
-	spbridge.BaseResponse
+	pitaya.BaseResponse
 	Name string `json:"name"`
 }
 
-func ABCHandler(request spbridge.Request) (spbridge.Response, error) {
+func ABCHandler(request pitaya.Request) (pitaya.Response, error) {
 	req := request.(*ABCRequest)
 	if req.Name == "test" {
 		return &ABCResponse{Name: "ok"}, nil
@@ -26,7 +26,7 @@ func ABCHandler(request spbridge.Request) (spbridge.Response, error) {
 }
 
 func main() {
-	server := spbridge.NewServer()
+	server := pitaya.NewServer()
 	server.POST("/abc", ABCHandler, &ABCRequest{})
 	log.Fatal(server.Start(":10200"))
 }

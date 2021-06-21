@@ -1,4 +1,4 @@
-package spbridge
+package pitaya
 
 import (
 	"bytes"
