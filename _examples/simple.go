@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/shapled/pitaya/v1"
+	"github.com/shapled/pitaya"
 )
 
 type ABCRequest struct {

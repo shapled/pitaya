@@ -1,4 +1,4 @@
-module github.com/shapled/pitaya/v1
+module github.com/shapled/pitaya
 
 go 1.14
 
