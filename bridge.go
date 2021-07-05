@@ -2,6 +2,7 @@ package pitaya
 
 import (
 	"net/http"
+	"reflect"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -83,16 +84,20 @@ func NewServerWithArgs(badRequestStatus int, responseWrapper func(Response) inte
 	}
 }
 
-func (server *Server) HandlerWrapper(handler func(Request) (Response, error), req Request) func(echo.Context) error {
+func (server *Server) HandlerWrapper(handler func(Request) (Response, error), r Request) func(echo.Context) error {
 	return func(ctx echo.Context) error {
+		req := reflect.New(reflect.ValueOf(r).Elem().Type()).Interface().(Request)
 		if req != nil {
 			if err := ctx.Bind(req); err != nil {
-				return echo.NewHTTPError(http.StatusBadRequest, server.errorWrapper(err))
+				return ctx.JSON(http.StatusBadRequest, server.errorWrapper(err))
+			}
+			if err := ctx.Validate(req); err != nil {
+				return ctx.JSON(http.StatusBadRequest, server.errorWrapper(err))
 			}
 		}
 		resp, err := handler(req)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, server.errorWrapper(err))
+			return ctx.JSON(http.StatusBadRequest, server.errorWrapper(err))
 		}
 		return ctx.JSON(http.StatusOK, server.responseWrapper(resp))
 	}

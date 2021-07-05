@@ -14,6 +14,7 @@ import (
 type ABCRequest struct {
 	BaseRequest
 	Name string `json:"name"`
+	Type string `json:"type" validate:"required"`
 }
 
 type ABCResponse struct {
@@ -34,13 +35,15 @@ func Test_Server(t *testing.T) {
 	server.POST("/abc", ABCHandler, &ABCRequest{})
 	go server.Start(":10200")
 	defer server.Close()
+	// test request
 	bodyJson, err := json.Marshal(map[string]interface{}{
 		"name": "test",
+		"type": "???",
 	})
 	assert.Nil(t, err)
 	req, err := http.NewRequest(http.MethodPost, "http://localhost:10200/abc", bytes.NewBuffer(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
 	assert.Nil(t, err)
+	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	assert.Nil(t, err)
 	defer resp.Body.Close()
@@ -50,4 +53,15 @@ func Test_Server(t *testing.T) {
 	err = json.Unmarshal(bs, r)
 	assert.Nil(t, err)
 	assert.Equal(t, "ok", r.Name)
+	// test validator
+	bodyJson, err = json.Marshal(map[string]interface{}{
+		"name": "test",
+	})
+	assert.Nil(t, err)
+	req, err = http.NewRequest(http.MethodPost, "http://localhost:10200/abc", bytes.NewBuffer(bodyJson))
+	assert.Nil(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err = http.DefaultClient.Do(req)
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
